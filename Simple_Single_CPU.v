@@ -170,7 +170,7 @@ wire [32-1:0] shift_amt;
 		
 Mux2to1 #(.size(32)) Mux_Shift_v(
         .data0_i({27'd0,EX_instruction[10:6]}),
-        .data1_i(readData1),
+        .data1_i(EX_readData1),
         .select_i(ALU_operation[1]),
         .data_o(shift_amt)
         );	
