@@ -5,6 +5,8 @@ input         clk_i;
 input         rst_n;
 
 //Internal Signals
+reg [63:0] reg_IF_ID;
+
 wire [32-1:0] IF_instruction, ID_instruction, regWriteData, readData1, readData2, 
 				ALU_result, Shifter_result, ALU_Shifter_result;
 wire RegDst, RegWrite, ALUSrc, Branch, BranchType, MemWrite, MemRead, MemtoReg, ALU_zero;
@@ -44,7 +46,7 @@ Adder Add_branch_address(
 		);
 
 Mux2to1 #(.size(32)) Mux_branch_or_not(
-        .data0_i(ID_program_suppose),
+        .data0_i(IF_program_suppose),
         .data1_i(program_after_branch),
         .select_i(Branch & (ALU_zero ^ BranchType)),
         .data_o(program_next)
