@@ -7,13 +7,13 @@ input         rst_n;
 //Internal Signals
 wire [32-1:0] IF_instruction, ID_instruction, regWriteData, readData1, readData2, 
 				ALU_result, Shifter_result, ALU_Shifter_result;
-wire RegDst, RegWrite, ALUSrc, Jump, Branch, BranchType, MemWrite, MemRead, MemtoReg, ALU_zero;
+wire RegDst, RegWrite, ALUSrc, Branch, BranchType, MemWrite, MemRead, MemtoReg, ALU_zero;
 wire [3-1:0] ALUOP;
 wire [32-1:0] instance_signExtend, instance_zeroFilled;
 
 //modules
 wire [32-1:0] program_now, IF_program_suppose, ID_program_suppose, program_next,
-			program_after_branch, program_no_jump;
+			program_after_branch;
 
 always@(posedge clk_i)
 begin
@@ -47,16 +47,9 @@ Mux2to1 #(.size(32)) Mux_branch_or_not(
         .data0_i(ID_program_suppose),
         .data1_i(program_after_branch),
         .select_i(Branch & (ALU_zero ^ BranchType)),
-        .data_o(program_no_jump)
-        );
-
-Mux2to1 #(.size(32)) Mux_jump_or_not(
-        .data0_i(program_no_jump),
-        .data1_i({ID_program_suppose[31:28], ID_instruction[25:0], 2'b00}),
-        .select_i(Jump),
         .data_o(program_next)
         );
-	
+
 Instr_Memory IM(
         .pc_addr_i(program_now),  
 	    .instr_o(IF_instruction)    
@@ -91,7 +84,6 @@ Decoder Decoder(
 	    .RegDst_o(RegDst),
 		.Branch_o(Branch),
 		.BranchType_o(BranchType),
-		.Jump_o(Jump),
 		.MemRead_o(MemRead),
 		.MemWrite_o(MemWrite),
 		.MemtoReg_o(MemtoReg)
