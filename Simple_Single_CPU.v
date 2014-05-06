@@ -7,17 +7,18 @@ input         rst_n;
 //Internal Signals
 reg [63:0] reg_IF_ID;
 reg [191:0] reg_ID_EX;
+reg [106:0] reg_EX_MEM;
 
-wire [32-1:0] IF_instruction, ID_instruction, regWriteData, ID_readData1, EX_readData1, ID_readData2, EX_readData2, 
-				ALU_result, Shifter_result, ALU_Shifter_result;
+wire [32-1:0] IF_instruction, ID_instruction, regWriteData, ID_readData1, EX_readData1, ID_readData2, EX_readData2, MEM_readData2, 
+				ALU_result, Shifter_result, EX_ALU_Shifter_result, MEM_ALU_Shifter_result;
 wire [20:0] EX_instruction;
-wire ID_RegDst, EX_RegDst, ID_RegWrite, EX_RegWrite, ID_ALUSrc, EX_ALUSrc, ID_Branch, EX_Branch, ID_BranchType, EX_BranchType, ID_MemWrite, EX_MemWrite, ID_MemRead, EX_MemRead, ID_MemtoReg, EX_MemtoReg, ALU_zero;
+wire ID_RegDst, EX_RegDst, ID_RegWrite, EX_RegWrite, MEM_RegWrite, ID_ALUSrc, EX_ALUSrc, ID_Branch, EX_Branch, MEM_Branch, ID_BranchType, EX_BranchType, ID_MemWrite, EX_MemWrite, MEM_MemWrite, ID_MemRead, EX_MemRead, MEM_MemRead, ID_MemtoReg, EX_MemtoReg, MEM_MemtoReg, ALU_zero, EX_BeqBne, MEM_BeqBne;
 wire [3-1:0] ID_ALUOP, EX_ALUOP;
 wire [32-1:0] ID_instance_signExtend, EX_instance_signExtend, ID_instance_zeroFilled, EX_instance_zeroFilled;
 
 //modules
 wire [32-1:0] program_now, IF_program_suppose, ID_program_suppose, EX_program_suppose, program_next,
-			program_after_branch;
+			EX_program_after_branch, MEM_program_after_branch;
 
 always@(posedge clk_i)
 begin
@@ -63,6 +64,31 @@ begin
 	EX_instruction <= reg_ID_EX[20:0];
 end
 
+always@(posedge clk_i)
+begin
+	reg_EX_MEM[106] <= EX_RegWrite;
+	reg_EX_MEM[105] <= EX_MemtoReg;
+	reg_EX_MEM[104] <= EX_Branch;
+	reg_EX_MEM[103] <= EX_MemRead;
+	reg_EX_MEM[102] <= EX_MemWrite;
+	reg_EX_MEM[101:70] <= EX_program_after_branch;
+	reg_EX_MEM[69] <= EX_BeqBne;
+	reg_EX_MEM[68:37] <= EX_ALU_Shifter_result;
+	reg_EX_MEM[36:5] <= EX_readData2;
+	reg_EX_MEM[4:0] <= EX_writeReg_addr;
+	
+	MEM_RegWrite <= reg_EX_MEM[106];
+	MEM_MemtoReg <= reg_EX_MEM[105];
+	MEM_Branch <= reg_EX_MEM[104];
+	MEM_MemRead <= reg_EX_MEM[103];
+	MEM_MemWrite <= reg_EX_MEM[102];
+	MEM_program_after_branch <= reg_EX_MEM[101:70];
+	MEM_BeqBne <= reg_EX_MEM[69];
+	MEM_ALU_Shifter_result <= reg_EX_MEM[68:37];
+	MEM_readData2 <= reg_EX_MEM[36:5];
+	MEM_writeReg_addr <= reg_EX_MEM[4:0];
+end
+
 Program_Counter PC(
         .clk_i(clk_i),      
 	    .rst_n(rst_n),     
@@ -79,13 +105,15 @@ Adder Adder_counter_add_4(
 Adder Add_branch_address(
 		.src1_i(EX_program_suppose),
 		.src2_i({instance_signExtend[29:0], 2'b00}),
-		.sum_o(program_after_branch)
+		.sum_o(EX_program_after_branch)
 		);
 
+assign EX_BeqBne = ALU_zero ^ EX_BranchType;
+		
 Mux2to1 #(.size(32)) Mux_branch_or_not(
         .data0_i(IF_program_suppose),
-        .data1_i(program_after_branch),
-        .select_i(EX_Branch & (ALU_zero ^ EX_BranchType)),
+        .data1_i(MEM_program_after_branch),
+        .select_i(MEM_Branch & MEM_BeqBne),
         .data_o(program_next)
         );
 
@@ -94,13 +122,13 @@ Instr_Memory IM(
 	    .instr_o(IF_instruction)    
 	    );
 
-wire [5-1:0] writeReg_addr;
+wire [5-1:0] EX_writeReg_addr, MEM_writeReg_addr;
 		
 Mux2to1 #(.size(5)) Mux_Write_Reg(
         .data0_i(EX_instruction[20:16]),
         .data1_i(EX_instruction[15:11]),
         .select_i(EX_RegDst),
-        .data_o(writeReg_addr)
+        .data_o(EX_writeReg_addr)
         );	
 		
 Reg_File RF(
@@ -108,7 +136,7 @@ Reg_File RF(
 	    .rst_n(rst_n) ,     
         .RSaddr_i(ID_instruction[25:21]) ,  
         .RTaddr_i(ID_instruction[20:16]) ,  
-        .RDaddr_i(writeReg_addr) ,  
+        .RDaddr_i(MEM_writeReg_addr) ,  
         .RDdata_i(regWriteData)  , 
         .RegWrite_i(EX_RegWrite),
         .RSdata_o(ID_readData1) ,  
@@ -187,24 +215,24 @@ Mux3to1 #(.size(32)) RDdata_Source(
         .data1_i(Shifter_result),
 		.data2_i(EX_instance_zeroFilled),
         .select_i(FURslt),
-        .data_o(ALU_Shifter_result)
+        .data_o(EX_ALU_Shifter_result)
         );
 
 wire [32-1:0] MemReadData;
 		
 Data_Memory DM(
 		.clk_i(clk_i),
-		.addr_i(ALU_Shifter_result),
-		.data_i(EX_readData2),
-		.MemRead_i(EX_MemRead),
-		.MemWrite_i(EX_MemWrite),
+		.addr_i(MEM_ALU_Shifter_result),
+		.data_i(MEM_readData2),
+		.MemRead_i(MEM_MemRead),
+		.MemWrite_i(MEM_MemWrite),
 		.data_o(MemReadData)
 		);		
 
 Mux2to1 #(.size(32)) Mux_FURslt_or_Memory(
-		.data0_i(ALU_Shifter_result),
+		.data0_i(MEM_ALU_Shifter_result),
 		.data1_i(MemReadData),
-		.select_i(EX_MemtoReg),
+		.select_i(MEM_MemtoReg),
 		.data_o(regWriteData)
 		);
 endmodule
