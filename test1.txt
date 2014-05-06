@@ -1,0 +1,22 @@
+addi 	r1,r0,1			r1=1
+addi 	r2,r0,2			r2=2
+addi 	r3,r0,3			r3=3
+addi 	r4,r0,4			r4=4
+addi 	r5,r0,5			r5=5
+jump 	j
+---若jump對，以下兩個addi將不會執行
+addi 	r1,r0,31		r1=31
+addi 	r2,r0,63		r2=63
+---
+j:
+sw 	r1,0(r0)		m0=1
+sw 	r2,4(r0)		m1=2
+lw 	r6,0(r0)		r6=1
+beq	r1,r6,1
+lw 	r7,0(r4)		r7=2 //若beq對，lw不會執行
+add	r8,r1,r3		r8=4 r8=5
+addi	r1,r1,1			r1=2 r1=3
+bne	r8,r5,-3
+lw 	r9,4(r0)		r9=2
+
+
