@@ -221,3 +221,7 @@ work/_info
 work/_vmake
 *.mti
 CO_P4_result.txt
+CO_P5_test1.txt
+CO_P_test1_ASM.txt
+CO_P_test2_ASM.txt
+CO_P5_test2.txt
