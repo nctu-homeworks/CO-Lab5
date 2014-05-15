@@ -7,6 +7,7 @@ module reg_IF_ID (clk_i, rst_n,
 	instruction_o
 );
 
+input clk_i, rst_n;
 input [31:0] program_suppose_i, instruction_i;
 output reg [31:0] program_suppose_o, instruction_o;
 

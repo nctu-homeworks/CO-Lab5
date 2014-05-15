@@ -33,6 +33,7 @@ module reg_ID_EX (clk_i, rst_n,
 	instruction_o
 );
 
+input clk_i, rst_n;
 input MemtoReg_i, MemRead_i, MemWrite_i, Branch_i, RegWrite_i, BranchType_i, RegDst_i, ALUSrc_i;
 input [2:0] ALUOP_i;
 input [31:0] program_suppose_i, readData1_i, readData2_i, instance_signExtend_i, instance_zeroFilled_i;

@@ -23,6 +23,7 @@ module reg_EX_MEM (clk_i, rst_n,
 	writeReg_addr_o
 );
 
+input clk_i, rst_n;
 input RegWrite_i, MemtoReg_i, Branch_i, MemRead_i, MemWrite_i, BeqBne_i;
 input [31:0] program_after_branch_i, ALU_Shifter_result_i,
 readData2_i;

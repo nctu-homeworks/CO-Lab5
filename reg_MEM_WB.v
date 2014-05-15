@@ -13,6 +13,7 @@ module reg_MEM_WB (clk_i, rst_n,
 	writeReg_addr_o
 );
 
+input clk_i, rst_n;
 input RegWrite_i, MemtoReg_i;
 input [31:0] MemReadData_i, ALU_Shifter_result_i;
 input [4:0] writeReg_addr_i;
