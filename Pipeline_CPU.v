@@ -5,8 +5,6 @@ input         clk_i;
 input         rst_n;
 
 //Internal Signals
-reg [70:0] reg_MEM_WB;
-
 wire [32-1:0] IF_instruction, ID_instruction, regWriteData, ID_readData1, EX_readData1, ID_readData2, EX_readData2, MEM_readData2, 
 				ALU_result, Shifter_result, EX_ALU_Shifter_result, MEM_ALU_Shifter_result, WB_ALU_Shifter_result;
 wire [20:0] EX_instruction;
@@ -87,20 +85,20 @@ reg_EX_MEM EXMEM( clk_i, rst_n,
 	MEM_writeReg_addr
 );
 
-always@(posedge clk_i)
-begin
-	reg_MEM_WB[70] <= MEM_RegWrite;
-	reg_MEM_WB[69] <= MEM_MemtoReg;
-	reg_MEM_WB[68:37] <= MEM_MemReadData;
-	reg_MEM_WB[36:5] <= MEM_ALU_Shifter_result;
-	reg_MEM_WB[4:0] <= MEM_writeReg_addr;
-	
-	WB_RegWrite <= reg_MEM_WB[70];
-	WB_MemtoReg <= reg_MEM_WB[69];
-	WB_MemReadData <= reg_MEM_WB[68:37];
-	WB_ALU_Shifter_result <= reg_MEM_WB[36:5];
-	WB_writeReg_addr <= reg_MEM_WB[4:0];
-end
+reg_MEM_WB MEMWB( clk_i, rst_n,
+	//MEM
+	MEM_RegWrite,
+	MEM_MemtoReg,
+	MEM_MemReadData,
+	MEM_ALU_Shifter_result,
+	MEM_writeReg_addr,
+	//WB
+	WB_RegWrite,
+	WB_MemtoReg,
+	WB_MemReadData,
+	WB_ALU_Shifter_result,
+	WB_writeReg_addr
+);
 
 Program_Counter PC(
         .clk_i(clk_i),      
