@@ -11,7 +11,8 @@ wire [20:0] EX_instruction;
 wire ID_RegDst, EX_RegDst, ID_RegWrite, EX_RegWrite, MEM_RegWrite, WB_RegWrite, ID_ALUSrc, EX_ALUSrc, ID_Branch, EX_Branch, MEM_Branch, ID_BranchType, EX_BranchType, ID_MemWrite, EX_MemWrite, MEM_MemWrite, ID_MemRead, EX_MemRead, MEM_MemRead, ID_MemtoReg, EX_MemtoReg, MEM_MemtoReg, WB_MemtoReg, ALU_zero, EX_BeqBne, MEM_BeqBne;
 wire [3-1:0] ID_ALUOP, EX_ALUOP;
 wire [32-1:0] ID_instance_signExtend, EX_instance_signExtend, ID_instance_zeroFilled, EX_instance_zeroFilled;
-
+wire [5-1:0] EX_writeReg_addr, MEM_writeReg_addr, WB_writeReg_addr;
+wire [32-1:0] MEM_MemReadData, WB_MemReadData;
 //modules
 wire [32-1:0] program_now, IF_program_suppose, ID_program_suppose, EX_program_suppose, program_next,
 			EX_program_after_branch, MEM_program_after_branch;
@@ -115,7 +116,7 @@ Adder Adder_counter_add_4(
 		
 Adder Add_branch_address(
 		.src1_i(EX_program_suppose),
-		.src2_i({instance_signExtend[29:0], 2'b00}),
+		.src2_i({EX_instance_signExtend[29:0], 2'b00}),
 		.sum_o(EX_program_after_branch)
 		);
 
@@ -133,7 +134,7 @@ Instr_Memory IM(
 	    .instr_o(IF_instruction)    
 	    );
 
-wire [5-1:0] EX_writeReg_addr, MEM_writeReg_addr, WB_writeReg_addr;
+
 		
 Mux2to1 #(.size(5)) Mux_Write_Reg(
         .data0_i(EX_instruction[20:16]),
@@ -147,8 +148,8 @@ Reg_File RF(
 	    .rst_n(rst_n) ,     
         .RSaddr_i(ID_instruction[25:21]) ,  
         .RTaddr_i(ID_instruction[20:16]) ,  
-        .RDaddr_i(WB_writeReg_addr) ,  
-        .RDdata_i(regWriteData)  , 
+        .Wrtaddr_i(WB_writeReg_addr) ,  
+        .Wrtdata_i(regWriteData)  , 
         .RegWrite_i(WB_RegWrite),
         .RSdata_o(ID_readData1) ,  
         .RTdata_o(ID_readData2)   
@@ -229,7 +230,6 @@ Mux3to1 #(.size(32)) RDdata_Source(
         .data_o(EX_ALU_Shifter_result)
         );
 
-wire [32-1:0] MEM_MemReadData, WB_MemReadData;
 		
 Data_Memory DM(
 		.clk_i(clk_i),
