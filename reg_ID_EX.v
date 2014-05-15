@@ -1,5 +1,5 @@
-module reg_IF_ID (clk_i, rst_n,
-	// From IF
+module reg_ID_EX (clk_i, rst_n,
+	// From ID
 	MemtoReg_i,
 	MemRead_i,
 	MemWrite_i,
@@ -15,7 +15,7 @@ module reg_IF_ID (clk_i, rst_n,
 	instance_signExtend_i,
 	instance_zeroFilled_i,
 	instruction_i,
-	// To ID
+	// To EX
 	MemtoReg_o,
 	MemRead_o,
 	MemWrite_o,

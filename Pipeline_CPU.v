@@ -5,7 +5,6 @@ input         clk_i;
 input         rst_n;
 
 //Internal Signals
-reg [106:0] reg_EX_MEM;
 reg [70:0] reg_MEM_WB;
 
 wire [32-1:0] IF_instruction, ID_instruction, regWriteData, ID_readData1, EX_readData1, ID_readData2, EX_readData2, MEM_readData2, 
@@ -63,30 +62,30 @@ reg_ID_EX IDEX( clk_i, rst_n,
 	EX_instruction
 );
 
-always@(posedge clk_i)
-begin
-	reg_EX_MEM[106] <= EX_RegWrite;
-	reg_EX_MEM[105] <= EX_MemtoReg;
-	reg_EX_MEM[104] <= EX_Branch;
-	reg_EX_MEM[103] <= EX_MemRead;
-	reg_EX_MEM[102] <= EX_MemWrite;
-	reg_EX_MEM[101:70] <= EX_program_after_branch;
-	reg_EX_MEM[69] <= EX_BeqBne;
-	reg_EX_MEM[68:37] <= EX_ALU_Shifter_result;
-	reg_EX_MEM[36:5] <= EX_readData2;
-	reg_EX_MEM[4:0] <= EX_writeReg_addr;
-	
-	MEM_RegWrite <= reg_EX_MEM[106];
-	MEM_MemtoReg <= reg_EX_MEM[105];
-	MEM_Branch <= reg_EX_MEM[104];
-	MEM_MemRead <= reg_EX_MEM[103];
-	MEM_MemWrite <= reg_EX_MEM[102];
-	MEM_program_after_branch <= reg_EX_MEM[101:70];
-	MEM_BeqBne <= reg_EX_MEM[69];
-	MEM_ALU_Shifter_result <= reg_EX_MEM[68:37];
-	MEM_readData2 <= reg_EX_MEM[36:5];
-	MEM_writeReg_addr <= reg_EX_MEM[4:0];
-end
+reg_EX_MEM EXMEM( clk_i, rst_n,
+	//EX
+	EX_RegWrite,
+	EX_MemtoReg,
+	EX_Branch,
+	EX_MemRead,
+	EX_MemWrite,
+	EX_program_after_branch,
+	EX_BeqBne,
+	EX_ALU_Shifter_result,
+	EX_readData2,
+	EX_writeReg_addr,
+	//MEM
+	MEM_RegWrite,
+	MEM_MemtoReg,
+	MEM_Branch,
+	MEM_MemRead,
+	MEM_MemWrite,
+	MEM_program_after_branch,
+	MEM_BeqBne,
+	MEM_ALU_Shifter_result,
+	MEM_readData2,
+	MEM_writeReg_addr
+);
 
 always@(posedge clk_i)
 begin
