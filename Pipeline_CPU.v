@@ -5,7 +5,6 @@ input         clk_i;
 input         rst_n;
 
 //Internal Signals
-reg [191:0] reg_ID_EX;
 reg [106:0] reg_EX_MEM;
 reg [70:0] reg_MEM_WB;
 
@@ -21,46 +20,48 @@ wire [32-1:0] program_now, IF_program_suppose, ID_program_suppose, EX_program_su
 			EX_program_after_branch, MEM_program_after_branch;
 
 reg_IF_ID IFID( clk_i, rst_n,
+	//IF
 	IF_program_suppose,
 	IF_instruction,
+	//ID
 	ID_program_suppose,
 	ID_instruction
 );
 
-always@(posedge clk_i)
-begin
-	reg_ID_EX[191] <= ID_MemtoReg;
-	reg_ID_EX[190] <= ID_MemRead;
-	reg_ID_EX[189] <= ID_MemWrite;
-	reg_ID_EX[188] <= ID_Branch;
-	reg_ID_EX[187] <= ID_RegWrite;
-	reg_ID_EX[186] <= ID_BranchType;
-	reg_ID_EX[185] <= ID_RegDst;
-	reg_ID_EX[184:182] <= ID_ALUOP;
-	reg_ID_EX[181] <= ID_ALUSrc;
-	reg_ID_EX[180:149] <= ID_program_suppose;
-	reg_ID_EX[148:117] <= ID_readData1;
-	reg_ID_EX[116:85] <= ID_readData2;
-	reg_ID_EX[84:53] <= ID_instance_signExtend;
-	reg_ID_EX[52:21] <= ID_instance_zeroFilled;
-	reg_ID_EX[20:0] <= ID_instruction[20:0];
-	
-	EX_MemtoReg <= reg_ID_EX[191];
-	EX_MemRead <= reg_ID_EX[190];
-	EX_MemWrite <= reg_ID_EX[189];
-	EX_Branch <= reg_ID_EX[188];
-	EX_RegWrite <= reg_ID_EX[187];
-	EX_BranchType <= reg_ID_EX[186];
-	EX_RegDst <= reg_ID_EX[185];
-	EX_ALUOP <= reg_ID_EX[184:182];
-	EX_ALUSrc <= reg_ID_EX[181];
-	EX_program_suppose <= reg_ID_EX[180:149];
-	EX_readData1 <= reg_ID_EX[148:117];
-	EX_readData2 <= reg_ID_EX[116:85];
-	EX_instance_signExtend <= reg_ID_EX[84:53];
-	EX_instance_zeroFilled <= reg_ID_EX[52:21];
-	EX_instruction <= reg_ID_EX[20:0];
-end
+reg_ID_EX IDEX( clk_i, rst_n,
+	//ID
+	ID_MemtoReg,
+	ID_MemRead,
+	ID_MemWrite,
+	ID_Branch,
+	ID_RegWrite,
+	ID_BranchType,
+	ID_RegDst,
+	ID_ALUOP,
+	ID_ALUSrc,
+	ID_program_suppose,
+	ID_readData1,
+	ID_readData2,
+	ID_instance_signExtend,
+	ID_instance_zeroFilled,
+	ID_instruction[20:0],
+	//EX
+	EX_MemtoReg,
+	EX_MemRead,
+	EX_MemWrite,
+	EX_Branch,
+	EX_RegWrite,
+	EX_BranchType,
+	EX_RegDst,
+	EX_ALUOP,
+	EX_ALUSrc,
+	EX_program_suppose,
+	EX_readData1,
+	EX_readData2,
+	EX_instance_signExtend,
+	EX_instance_zeroFilled,
+	EX_instruction
+);
 
 always@(posedge clk_i)
 begin
