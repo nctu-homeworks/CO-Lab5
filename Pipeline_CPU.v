@@ -1,11 +1,10 @@
-module Simple_Single_CPU( clk_i, rst_n );
+module Pipeline_CPU( clk_i, rst_n );
 
 //I/O port
 input         clk_i;
 input         rst_n;
 
 //Internal Signals
-reg [63:0] reg_IF_ID;
 reg [191:0] reg_ID_EX;
 reg [106:0] reg_EX_MEM;
 reg [70:0] reg_MEM_WB;
@@ -21,14 +20,12 @@ wire [32-1:0] ID_instance_signExtend, EX_instance_signExtend, ID_instance_zeroFi
 wire [32-1:0] program_now, IF_program_suppose, ID_program_suppose, EX_program_suppose, program_next,
 			EX_program_after_branch, MEM_program_after_branch;
 
-always@(posedge clk_i)
-begin
-	reg_IF_ID[63:32] <= IF_program_suppose;
-	reg_IF_ID[31:0] <= IF_instruction;
-
-	ID_program_suppose <= reg_IF_ID[63:32];
-	ID_instruction <= reg_IF_ID[31:0];
-end
+reg_IF_ID IFID( clk_i, rst_n,
+	IF_program_suppose,
+	IF_instruction,
+	ID_program_suppose,
+	ID_instruction
+);
 
 always@(posedge clk_i)
 begin
